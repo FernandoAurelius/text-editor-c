@@ -1,3 +1,5 @@
+#include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
@@ -40,6 +42,15 @@ int main() {
     *
     * Now, the program will 'quit' afther the user enters the letter 'q'.
     */
-    while(read(STDIN_FILENO, &c, 1) == 1 && c != 'q');
+    while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
+		// In case it's a non-printable character, just shows its ASCII code
+		if (iscntrl(c)) {
+			printf("%d\n", c);
+		} else {
+			// In case it's a printable character, shows its ASCII code and its 
+			// character representation
+			printf("%d ('%c')\n", c, c);
+		}
+    }
     return 0;
 }
