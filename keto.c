@@ -27,6 +27,9 @@ void enableRawMode() {
 
     tcgetattr(STDIN_FILENO, &raw);
     
+    // Disable CTRL-S and CTRL-Q in terminal.
+    raw.c_iflag &= ~(IXON);
+    // Disable ECHO, CTRL-C and CTRL-Z in terminal.
     raw.c_lflag &= ~(ECHO | ICANON | ISIG);
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
@@ -40,7 +43,7 @@ int main() {
     /* Reads 1 byte of the standard input, and put it into the variable c, until there's 
     * no more bytes to read. 
     *
-    * Now, the program will 'quit' afther the user enters the letter 'q'.
+    * Now, the program will 'quit' after the user enters the letter 'q'.
     */
     while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
 		// In case it's a non-printable character, just shows its ASCII code
