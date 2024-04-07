@@ -37,28 +37,31 @@ void enableRawMode() {
     // Disable ECHO, CTRL-C, CTRL-Z, CTRL-V and CTRL-O in terminal.
     raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
 
+    // Sets a timer for the read() function.
+    raw.c_cc[VMIN] = 0;
+    raw.c_cc[VTIME] = 1;
+
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
 int main() {
     enableRawMode();
-
-    char c;
     
     /* Reads 1 byte of the standard input, and put it into the variable c, until there's 
     * no more bytes to read. 
     *
     * Now, the program will 'quit' after the user enters the letter 'q'.
     */
-    while (read(STDIN_FILENO, &c, 1) == 1 && c != 'q') {
-		// In case it's a non-printable character, just shows its ASCII code.
-		if (iscntrl(c)) {
-			printf("%d\r\n", c);
-		} else {
-			// In case it's a printable character, shows its ASCII code and its 
-			// character representation.
-			printf("%d ('%c')\r\n", c, c);
-		}
+    while(1) {
+        char c = '\0';
+
+        read(STDIN_FILENO, &c, 1);
+        if(iscntrl(c)) {
+            printf("%d\r\n", c);
+        } else {
+            printf("%d ('%c')\r\n", c, c);
+        }
+        if(c == 'q') break;
     }
     return 0;
 }
