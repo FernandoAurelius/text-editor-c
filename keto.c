@@ -29,8 +29,8 @@ void enableRawMode() {
     
     // Disable CTRL-S and CTRL-Q in terminal.
     raw.c_iflag &= ~(IXON);
-    // Disable ECHO, CTRL-C and CTRL-Z in terminal.
-    raw.c_lflag &= ~(ECHO | ICANON | ISIG);
+    // Disable ECHO, CTRL-C, CTRL-Z, CTRL-V and CTRL-O in terminal.
+    raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
