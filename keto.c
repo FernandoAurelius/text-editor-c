@@ -28,10 +28,12 @@ void enableRawMode() {
 
     tcgetattr(STDIN_FILENO, &raw);
     
-    // Disable CTRL-S, CTRL-Q, fix CTRL-M in terminal.
-    raw.c_iflag &= ~(IXON | ICRNL);
+    // Disable CTRL-S, CTRL-Q, fix CTRL-M and disable miscellaneous flags in terminal.
+    raw.c_iflag &= ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP);
     // Disable output process of newline (\r\n).
     raw.c_oflag &= ~(OPOST);
+    // Enable CS8 bit mask to set caracther size to 8 bits per byte.
+    raw.c_lflag |= (CS8);
     // Disable ECHO, CTRL-C, CTRL-Z, CTRL-V and CTRL-O in terminal.
     raw.c_lflag &= ~(ECHO | ICANON | ISIG | IEXTEN);
 
