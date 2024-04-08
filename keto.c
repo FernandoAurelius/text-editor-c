@@ -1,3 +1,5 @@
+/*** includes ***/
+
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -5,8 +7,12 @@
 #include <termios.h>
 #include <unistd.h>
 
+/*** data ***/
+
 // Global variable storing the original flags of the terminal.
 struct termios orig_termios;
+
+/*** terminal ***/
 
 void die(const char *s) {
     perror(s);
@@ -49,6 +55,9 @@ void enableRawMode() {
 
     if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
+
+
+/*** init ***/
 
 int main() {
     enableRawMode();
