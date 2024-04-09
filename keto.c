@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 
@@ -16,6 +17,9 @@
 
 // Global struct storing the configs of our text editor.
 struct editorConfig {
+    // Variables storing the number of rows and columns of the size of the terminal.
+    int screenrows;
+    int screencols;
     // Global variable storing the original flags of the terminal.
     struct termios orig_termios;
 };
@@ -73,6 +77,18 @@ void enableRawMode() {
     if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
+int getWindowSize(int *rows, int *cols) {
+    struct winsize ws;
+
+    if(ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0) {
+        return -1;
+    } else {
+        *cols = ws.ws_col;
+        *rows = ws.ws_row;
+        return 0;
+    }
+}
+
 // Reads the keypress from the user.
 char editorReadKey() {
     int nread;
@@ -90,7 +106,7 @@ char editorReadKey() {
 // After drawing, returns the cursor to the beginning of the line (left side of screen).
 void editorDrawRows() {
     int y;
-    for(y = 0; y < 24; y++) {
+    for(y = 0; y < E.screenrows; y++) {
         write(STDOUT_FILENO, "~\r\n", 3);
     }
 }
@@ -123,8 +139,14 @@ void editorProcessKeyPress() {
 
 /*** init ***/
 
+// Initializes both screen rows and columns of our struct E.
+void initEditor() {
+    if(getWindowSize(&E.screenrows, &E.screencols) == -1 ) die("getWindowSize");
+}
+
 int main() {
     enableRawMode();
+    initEditor();
     
     // Now we only call our function editorProcessKeyPress() on main.
     while(1) {
