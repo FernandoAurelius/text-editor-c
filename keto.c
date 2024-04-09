@@ -75,6 +75,11 @@ char editorReadKey() {
     return c;
 }
 
+/*** output ***/
+void editorRefreshScreen() {
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+}
+
 /*** input ***/
 
 // Verifies if the keypress from the user is the CTRL-Q command. If it is, breaks the code.
@@ -95,6 +100,7 @@ int main() {
     
     // Now we only call our function editorProcessKeyPress() on main.
     while(1) {
+        editorRefreshScreen();
         editorProcessKeyPress();
     }
     return 0;
