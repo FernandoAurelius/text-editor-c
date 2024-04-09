@@ -20,6 +20,7 @@ struct termios orig_termios;
 /*** terminal ***/
 
 // Shows the error message using perror and then exits the program, returning 1 as usual.
+// Clear the screen before showing the error message.
 void die(const char *s) {
     write(STDOUT_FILENO, "\x1b[2J", 4);
     write(STDOUT_FILENO, "\x1b[H", 3);
@@ -79,8 +80,23 @@ char editorReadKey() {
 }
 
 /*** output ***/
+
+// Draws a tilde on the beginning of every row.
+// After drawing, returns the cursor to the beginning of the line (left side of screen).
+void editorDrawRows() {
+    int y;
+    for(y = 0; y < 24; y++) {
+        write(STDOUT_FILENO, "~\r\n", 3);
+    }
+}
+
+// Clear the screen using escape sequences.
+// Also returns the cursor to the left side of the screen.
 void editorRefreshScreen() {
     write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
+
+    editorDrawRows();
     write(STDOUT_FILENO, "\x1b[H", 3);
 }
 
@@ -92,6 +108,7 @@ void editorProcessKeyPress() {
 
     switch(c) {
         case(CTRL_KEY('q')):
+            // Clears the screen before breaking.
             write(STDOUT_FILENO, "\x1b[2J", 4);
             write(STDOUT_FILENO, "\x1b[H", 3);
             exit(0);
