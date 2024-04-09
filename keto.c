@@ -14,8 +14,13 @@
 
 /*** data ***/
 
-// Global variable storing the original flags of the terminal.
-struct termios orig_termios;
+// Global struct storing the configs of our text editor.
+struct editorConfig {
+    // Global variable storing the original flags of the terminal.
+    struct termios orig_termios;
+};
+
+struct editorConfig E;
 
 /*** terminal ***/
 
@@ -33,7 +38,7 @@ void die(const char *s) {
 * to its original state using a variable "orig_termios".
 */
 void disableRawMode() {
-    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1) die("tcsetattr");
+    if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.orig_termios) == -1) die("tcsetattr");
 }
 
 /* Turn off echoing by getting the original terminal flags (tcgetattr), 
@@ -44,10 +49,10 @@ void disableRawMode() {
 */
 void enableRawMode() {
     // If tcgetattr crashes, shows a error message using the function die().
-    if(tcgetattr(STDIN_FILENO, &orig_termios) == -1) die("tcsetattr");
+    if(tcgetattr(STDIN_FILENO, &E.orig_termios) == -1) die("tcsetattr");
     atexit(disableRawMode);
 
-    struct termios raw = orig_termios;
+    struct termios raw = E.orig_termios;
 
     tcgetattr(STDIN_FILENO, &raw);
     
