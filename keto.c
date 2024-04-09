@@ -9,6 +9,7 @@
 
 /*** defines ***/
 
+// Define function CTRL_KEY() using macro
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 /*** data ***/
@@ -18,6 +19,7 @@ struct termios orig_termios;
 
 /*** terminal ***/
 
+// Shows the error message using perror and then exits the program, returning 1 as usual.
 void die(const char *s) {
     perror(s);
     exit(1);
@@ -37,6 +39,7 @@ void disableRawMode() {
 * using tcsetattr. At exit, disable all the changes made by calling disableRawMode().
 */
 void enableRawMode() {
+    // If tcgetattr crashes, shows a error message using the function die().
     if(tcgetattr(STDIN_FILENO, &orig_termios) == -1) die("tcsetattr");
     atexit(disableRawMode);
 
@@ -57,29 +60,42 @@ void enableRawMode() {
     raw.c_cc[VMIN] = 0;
     raw.c_cc[VTIME] = 1;
 
+    // Same as the beginning.
     if(tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw) == -1) die("tcsetattr");
 }
 
+// Reads the keypress from the user.
+char editorReadKey() {
+    int nread;
+    char c;
+    while((nread == read(STDIN_FILENO, &c, 1)) != 1) {
+        // Error handling.
+        if(nread == -1 && errno != EAGAIN) die("read");
+    }
+    return c;
+}
+
+/*** input ***/
+
+// Verifies if the keypress from the user is the CTRL-Q command. If it is, breaks the code.
+void editorProcessKeyPress() {
+    char c = editorReadKey();
+
+    switch(c) {
+        case(CTRL_KEY('q')):
+            exit(0);
+            break;
+    }
+}
 
 /*** init ***/
 
 int main() {
     enableRawMode();
     
-    /* Reads 1 byte of the standard input, and put it into the variable c, until there's 
-    * no more bytes to read. 
-    *
-    * Now, the program will 'quit' after the user enters the letter 'q'.
-    */
+    // Now we only call our function editorProcessKeyPress() on main.
     while(1) {
-        char c = '\0';
-        if(read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
-        if(iscntrl(c)) {
-            printf("%d\r\n", c);
-        } else {
-            printf("%d ('%c')\r\n", c, c);
-        }
-        if(c == CTRL_KEY('q')) break;
+        editorProcessKeyPress();
     }
     return 0;
 }
